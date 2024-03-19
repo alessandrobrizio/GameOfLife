@@ -15,11 +15,6 @@ namespace GameOfLife
             entityQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<SpawnCellsConfig>());
         }
 
-        private void Start()
-        {
-            UpdatePosition();
-        }
-
         public void UpdatePosition()
         {
             if (entityQuery.TryGetSingleton<SpawnCellsConfig>(out var config))

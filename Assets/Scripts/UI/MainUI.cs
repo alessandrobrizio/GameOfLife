@@ -1,7 +1,7 @@
+using System.Collections;
 using Tayx.Graphy;
 using TMPro;
 using Unity.Entities;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,10 +33,17 @@ namespace GameOfLife.UI
             _simulateCellsEntityQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<SimulateCellsConfig>());
         }
 
-        private void Start()
+        private IEnumerator Start()
         {
             _cameraController = FindObjectOfType<CameraController>();
-            _executeEntity = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Execute.Execute>()).GetSingletonEntity();
+            EntityQuery executeQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Execute.Execute>());
+
+            while (!executeQuery.TryGetSingletonEntity<Execute.Execute>(out _executeEntity))
+            {
+                yield return null;
+            }
+
+            _cameraController.UpdatePosition();
 
             if (_spawnCellsEntityQuery.TryGetSingleton<SpawnCellsConfig>(out var spawnCellsConfig))
             {
@@ -69,6 +76,8 @@ namespace GameOfLife.UI
             fpsToggle.SetIsOnWithoutNotify(graphyManager.FpsModuleState == GraphyManager.ModuleState.FULL);
             ramToggle.SetIsOnWithoutNotify(graphyManager.RamModuleState == GraphyManager.ModuleState.FULL);
             infoToggle.SetIsOnWithoutNotify(graphyManager.AdvancedModuleState == GraphyManager.ModuleState.FULL);
+
+            Randomize();
         }
 
         public void OnWidthEndEdit(string value)
